@@ -12,3 +12,7 @@
 .rounded-circle {
     margin-left: -15px;
 }
+
+.btn-block {
+    width: 100%;
+}

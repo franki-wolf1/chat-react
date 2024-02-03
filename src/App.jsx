@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 
 import './App.css'  
 import Links from './components/links'
@@ -6,9 +7,54 @@ import Count from './components/count'
 import Socialapp from './components/appsocial'  
 
 import 'bootswatch/dist/quartz/bootstrap.min.css'
- 
+import { db } from './firebase' 
+import { collection, getDoc, setDoc, doc, getDocs, deleteDoc, addDoc } from 'firebase/firestore';
 
-function App() {
+function App() {   
+
+  var id_salaChat = '';
+
+  const addSalaChat = async (salaChat) => {
+    try { 
+      id_salaChat = salaChat.salaId;
+
+      // Construir la referencia a la colección de salas usando el UID proporcionado
+      const salasChats = collection(db, `salasChats/${salaChat.salaId}/mensajes`);
+  
+      // Construir la referencia a un documento específico usando el UID
+      const salaDoc = await addDoc(salasChats, salaChat);
+   
+      console.log('SalaChat añadida con uid:', id_salaChat, '  ', salaDoc);
+    } catch (error) {
+      console.error('Error al añadir SalaChat:', error);
+    }
+  };
+
+  const addMensaje = async (mensaje)  => {
+    console.log('Mensaje por añadir:::::',mensaje); 
+ 
+    // Verificar que idSala esté definido
+    if (id_salaChat) {
+      // Construir la referencia a la colección de mensajes
+      const colMensajes = collection(db, `salasChats/${id_salaChat}/mensajes`);
+
+      // Llamar a la colección de mensajes de una sala
+      const addmensaje = await addDoc(colMensajes, mensaje);
+      console.log('mensaje añadido ', addmensaje); 
+    } else {
+      console.error('Error: id_salaChat no definido al intentar añadir mensaje.');
+      alert('Hubo un error al enviar el mensaje. Por favor, inténtalo de nuevo.');
+    }
+  }  
+
+  const deleteMensaje = async (mensaje)  => {
+    console.log('Mensaje delete:::::',Mensaje); 
+    const docMensaje = collection(db, 'salasChats'+id_salaChat+'mensajes', mensaje.timeMensaje);
+    console.log('col Mensajes delete:::::',colMensajes); 
+    //llamar a la colecion de mensajes de una sala
+    const mensajes = await deleteDoc(docMensaje);
+
+  }
 
   return (
     <>
@@ -89,16 +135,16 @@ function App() {
         <div className="col">
           <div className="tab-content" id="v-pills-tabContent">
             <div className="tab-pane fade show active" id="v-pills-appsocial" role="tabpanel" aria-labelledby="v-pills-appsocial-tab">
-              <Socialapp></Socialapp>
+              <Socialapp addMensaje={addMensaje} addSalaChat={addSalaChat} />
             </div>
             <div className="tab-pane fade show" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
-              <Count></Count> 
+              <Count/> 
             </div>
             <div className="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
-              <Links></Links>
+              <Links/>
             </div>
             <div className="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
-              <LinkForm></LinkForm></div>
+              <LinkForm/></div>
             <div className="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">..f</div>
           </div>
         </div>
